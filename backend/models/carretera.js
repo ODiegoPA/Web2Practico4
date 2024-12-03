@@ -6,19 +6,10 @@ module.exports = (sequelize, Sequelize) => {
         estaBloqueada: {
             type: Sequelize.BOOLEAN
         },
-        latitud: {
-            type: Sequelize.FLOAT
-        },
-        longitud: {
-            type: Sequelize.FLOAT
-        },
         idMunicipioOrigen: {
             type: Sequelize.INTEGER
         },
         idMunicipioDestino: {
-            type: Sequelize.INTEGER
-        },
-        incidenteId: {
             type: Sequelize.INTEGER
         },
         ultimoCambioId: {
