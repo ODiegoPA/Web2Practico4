@@ -5,22 +5,35 @@ const fs = require('fs');
 
 exports.listIncidentes = async (req, res) => {
     try {
-        const incidentes = await db.incidente.findAll({
-            order: [['fecha', 'DESC']],
+        const incidentes = await db.incidentes.findAll({
             include: [
                 {
                     model: db.carretera,
                     as: 'carretera',
-                    attributes: ['nombre']
+                    include: [
+                        {
+                            model: db.municipio,
+                            as: 'municipioOrigen',
+                        },
+                        {
+                            model: db.municipio,
+                            as: 'municipioDestino',
+                        },
+                        {
+                            model: db.puntosCarretera,
+                            as: 'puntosCarretera',
+                            attributes: ['latitud', 'longitud']
+                        },
+                    ],
                 },
                 {
-                    model: db.municipio,
-                    as: 'municipio',
+                    model: db.tipoIncidente,
+                    as: 'tipoIncidente',
                     attributes: ['nombre']
                 },
                 {
                     model: db.usuario,
-                    as: 'usuario',
+                    as: 'usuarioUltimoCambioIncidente',
                     attributes: ['nombre']
                 }
             ]
@@ -41,15 +54,25 @@ exports.getIncidenteById = async (req, res) => {
                 {
                     model: db.carretera,
                     as: 'carretera',
-                    attributes: ['nombre']
-                },
-                {
-                    model: db.usuario,
-                    as: 'usuario',
+                    include: [
+                        {
+                            model: db.municipio,
+                            as: 'municipioOrigen',
+                        },
+                        {
+                            model: db.municipio,
+                            as: 'municipioDestino',
+                        },
+                    ],
                 },
                 {
                     model: db.tipoIncidente,
                     as: 'tipoIncidente',
+                    attributes: ['nombre']
+                },
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambioIncidente',
                     attributes: ['nombre']
                 }
             ]
@@ -66,7 +89,6 @@ exports.getCarreteraByIncidenteId = async (req, res) => {
     const incidenteId = req.params.id;
 
     try {
-        // Buscar el incidente para obtener la carretera asociada
         const incidente = await db.incidentes.findByPk(incidenteId, {
             include: [
                 {

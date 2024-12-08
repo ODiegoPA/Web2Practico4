@@ -8,6 +8,6 @@ module.exports = app => {
     router.put("/:id", usuarioController.updateUsuario);
     router.delete("/:id", usuarioController.deleteUsuario);
     router.post("/login", usuarioController.authUsuario);
-
+    router.put("/password/:id", usuarioController.cambiarContrasena);
     app.use('/usuario', router);
 }

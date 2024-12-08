@@ -3,7 +3,14 @@ const db = require('../models');
 exports.listMunicipios = async (req, res) => {
     try {
         const municipios = await db.municipio.findAll({
-            order: [['nombre', 'ASC']]
+            order: [['nombre', 'ASC']],
+            include: [
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambio',
+                    attributes: ['nombre']
+                }
+            ]
         });
         res.status(200).json(municipios);
     } catch (error) {
@@ -16,7 +23,15 @@ exports.listMunicipios = async (req, res) => {
 exports.getMunicipioById = async (req, res) => {
     const id = req.params.id;
     try {
-        const municipio = await db.municipio.findByPk(id);
+        const municipio = await db.municipio.findByPk(id,{
+            include: [
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambio',
+                    attributes: ['nombre']
+                }
+            ]
+        });
         if (municipio) {
             res.status(200).json(municipio);
         } else {

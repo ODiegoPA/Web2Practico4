@@ -3,7 +3,14 @@ const db = require("../models");
 exports.listTipoIncidentes = async (req, res) => {
     try {
         const tipoIncidente = await db.tipoIncidente.findAll({
-            order: [['nombre', 'ASC']]
+            order: [['nombre', 'ASC']],
+            include: [
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambioTipoIncidente',
+                    attributes: ['nombre']
+                }
+            ]
         });
         res.status(200).json(tipoIncidente);
     } catch (error) {
@@ -16,7 +23,15 @@ exports.listTipoIncidentes = async (req, res) => {
 exports.getTipoIncidenteById = async (req, res) => {
     const id = req.params.id;
     try {
-        const tipoIncidente = await db.tipoIncidente.findByPk(id);
+        const tipoIncidente = await db.tipoIncidente.findByPk(id, {
+            include: [
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambioTipoIncidente',
+                    attributes: ['nombre']
+                }
+            ]
+        });
         if (tipoIncidente) {
             res.status(200).json(tipoIncidente);
         } else {

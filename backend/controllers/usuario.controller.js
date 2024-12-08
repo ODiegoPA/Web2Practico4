@@ -3,7 +3,15 @@ const bcrypt = require('bcrypt');
 
 exports.listUsuarios = async (req, res) => {
     try {
-        const usuarios = await db.usuario.findAll();
+        const usuarios = await db.usuario.findAll({
+            include: [
+                {
+                    model: db.usuario,
+                    as: 'usuariosUltimoCambio',
+                    attributes: ['nombre']
+                }
+            ]
+        });
         res.status(200).json(usuarios);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -38,6 +46,7 @@ exports.createUsuario = async (req, res) => {
             correo: req.body.email,
             contrasena: hashedPassword,
             esAdmin: req.body.esAdmin || false,
+            ultimoCambioId: req.body.ultimoCambioId,
         };
 
         const usuarioCreado = await db.usuario.create(usuario);
@@ -48,13 +57,13 @@ exports.createUsuario = async (req, res) => {
 };
 
 exports.authUsuario = async (req, res) => {
-    const email = req.body.email;
+    const correo = req.body.email;
     const password = req.body.password;
 
     try {
-        const usuario = await db.usuario.findOne({ where: { email } });
+        const usuario = await db.usuario.findOne({ where: { correo } });
 
-        if (!usuario || !(await bcrypt.compare(password, usuario.password))) {
+        if (!usuario || !(await bcrypt.compare(password, usuario.contrasena))) {
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
@@ -74,15 +83,36 @@ exports.updateUsuario = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        // Actualización de datos
-        usuario.nombre = req.body.nombre || usuario.nombre;
-        usuario.email = req.body.email || usuario.email;
+        usuario.nombre = req.body.nombre
+        usuario.email = req.body.email
         if (req.body.password) {
             usuario.password = await bcrypt.hash(req.body.password, 10);
         }
-        usuario.ultimoCambioId = req.body.ultimoCambioId || usuario.ultimoCambioId;
-        usuario.esAdmin = req.body.esAdmin || usuario.esAdmin;
+        usuario.ultimoCambioId = req.body.ultimoCambioId
+        usuario.esAdmin = req.body.esAdmin
 
+        await usuario.save();
+        res.status(200).json(usuario);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.cambiarContrasena = async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const usuario = await db.usuario.findByPk(id);
+
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        if (!req.body.password) {
+            return res.status(400).json({ message: 'La contraseña es requerida' });
+        }
+
+        usuario.contrasena = await bcrypt.hash(req.body.password, 10);
         await usuario.save();
         res.status(200).json(usuario);
     } catch (error) {

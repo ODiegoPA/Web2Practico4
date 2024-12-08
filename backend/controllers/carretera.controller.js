@@ -8,13 +8,21 @@ exports.listCarreteras = async (req, res) => {
                 {
                     model: db.municipio,
                     as: 'municipioOrigen',
-                    attributes: ['nombre']
                 },
                 {
                     model: db.municipio,
                     as: 'municipioDestino',
-                    attributes: ['nombre']
                 },
+                {
+                    model: db.puntosCarretera,
+                    as: 'puntosCarretera',
+                    attributes: ['latitud', 'longitud']
+                },
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambioCarretera',
+                    attributes: ['nombre']
+                }
             ]
         });
         res.status(200).json(carreteras);
@@ -32,17 +40,20 @@ exports.getCarreteraById = async (req, res) => {
                 {
                     model: db.municipio,
                     as: 'municipioOrigen',
-                    attributes: ['nombre']
                 },
                 {
                     model: db.municipio,
                     as: 'municipioDestino',
-                    attributes: ['nombre']
                 },
                 {
                     model: db.puntosCarretera,
                     as: 'puntosCarretera',
                     attributes: ['latitud', 'longitud']
+                },
+                {
+                    model: db.usuario,
+                    as: 'usuarioUltimoCambioCarretera',
+                    attributes: ['nombre']
                 }
             ]
         });
@@ -64,11 +75,11 @@ exports.verificarrEstadoCarretera = async (req, res) => {
     const id = req.params.id;
     try {
         const incidentes = await db.incidentes.findAll({
-            where: { carreteraId: id }
+            where: { idCarretera: id }
         });
 
         const estaBloqueada = incidentes.length > 0;
-
+        console.log(incidentes);
         const carretera = await db.carretera.findByPk(id);
         if (carretera) {
             carretera.estaBloqueada = estaBloqueada;

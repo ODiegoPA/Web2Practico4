@@ -1,0 +1,26 @@
+.nav-bar {
+    padding: 10px 20px;
+  }
+  
+  .brand-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .nav-button {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  
+  .nav-button:hover {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .nav-button a {
+    text-decoration: none;
+    color: inherit;
+  }
+  

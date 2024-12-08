@@ -7,6 +7,6 @@ module.exports = app => {
     router.post("/", carreteraController.createCarretera);
     router.put("/:id", carreteraController.updateCarretera);
     router.delete("/:id", carreteraController.deleteCarretera);
-
+    router.put("/verificar/:id", carreteraController.verificarrEstadoCarretera);
     app.use('/carretera', router);
 }
