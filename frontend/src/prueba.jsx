@@ -36,7 +36,7 @@ const MapaCarreteras = () => {
   return (
     <>
       {user ? <NavAdminMenu /> : <NavMainMenu />}
-      <LoadScript googleMapsApiKey="AIzaSyC5j_NfH5CoSXxxZY7XaKyLaAV_G08zkb8">
+      <LoadScript googleMapsApiKey="TU_API_ACA">
         <GoogleMap mapContainerStyle={containerStyle} center={centro} zoom={10}>
           {carreteras.map((carretera) => (
             <React.Fragment key={carretera.id}>

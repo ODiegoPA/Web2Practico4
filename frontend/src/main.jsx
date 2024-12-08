@@ -80,7 +80,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <APIProvider apiKey={"AIzaSyC5j_NfH5CoSXxxZY7XaKyLaAV_G08zkb8"}>
+    <APIProvider apiKey={"TU_API_ACA"}>
       <RouterProvider router={router} />
     </APIProvider>
   </StrictMode>
