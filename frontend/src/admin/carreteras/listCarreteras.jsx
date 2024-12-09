@@ -90,7 +90,7 @@ const ListCarreteras = () => {
                 ultimoCambioId: JSON.parse(localStorage.getItem("user")).id
             });
             setShowEditModal(false);
-            getListCarreteras(); // Actualizar la lista de carreteras
+            getListCarreteras();
         } catch (error) {
             console.error("Error al actualizar el nombre de la carretera:", error);
         }
@@ -172,7 +172,6 @@ const ListCarreteras = () => {
                         defaultCenter={defaultCenter}
                         defaultZoom={6}
                     >
-                        {/* Marcadores de municipios */}
                         {selectedCarretera?.municipioOrigen && (
                             <AdvancedMarker
                                 position={{
@@ -200,7 +199,6 @@ const ListCarreteras = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal para editar el nombre */}
             <Modal show={showEditModal} onHide={handleCloseEditModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Editar Nombre</Modal.Title>

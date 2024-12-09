@@ -101,7 +101,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <APIProvider apiKey={"Tu_API_ACA"}>
+    <APIProvider apiKey={"TU_API_KEY"}>
       <RouterProvider router={router} />
     </APIProvider>
   </StrictMode>

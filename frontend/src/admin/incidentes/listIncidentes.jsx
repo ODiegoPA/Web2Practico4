@@ -28,7 +28,7 @@ const ListIncidentes = () => {
             map: map,
             icon: {
                 path: window.google.maps.SymbolPath.CIRCLE,
-                fillColor: "#FF0000", // Rojo para indicar el accidente
+                fillColor: "#FF0000",
                 fillOpacity: 1,
                 strokeColor: "#FF0000",
                 strokeWeight: 1,
@@ -36,12 +36,11 @@ const ListIncidentes = () => {
             },
         });
 
-        // Dibujar la polyline si hay puntos
         if (polylineArray.length > 0) {
             const polyline = new window.google.maps.Polyline({
                 path: polylineArray,
                 geodesic: true,
-                strokeColor: "#0000FF", // Azul para la carretera
+                strokeColor: "#0000FF",
                 strokeOpacity: 1.0,
                 strokeWeight: 2,
             });
@@ -81,14 +80,12 @@ const ListIncidentes = () => {
         setSelectedIncidente(incidente);
         setShowMap(true);
 
-        // Coordenadas del incidente
         const puntoIncidente = {
             lat: incidente.latitud,
             lng: incidente.longitud,
         };
         setMarkerArray([puntoIncidente]);
 
-        // Obtener los puntos de la carretera
         const puntosCarretera = incidente.carretera.puntosCarretera.map(punto => ({
             lat: punto.latitud,
             lng: punto.longitud,
@@ -103,10 +100,10 @@ const ListIncidentes = () => {
     };
 
     const defaultCenter = {
-        lat: -16.2902, // Latitud aproximada del centro de Bolivia
-        lng: -63.5887, // Longitud aproximada del centro de Bolivia
+        lat: -17.78629,
+        lng: -63.18117,
     };
-    
+
 
     return (
         <>
@@ -176,7 +173,7 @@ const ListIncidentes = () => {
                         defaultCenter={defaultCenter}
                         defaultZoom={12}
                     >
-                        {/* Mostrar el marcador del incidente */}
+
                         {selectedIncidente && (
                             <AdvancedMarker
                                 position={{
@@ -186,7 +183,7 @@ const ListIncidentes = () => {
                                 title="Lugar del Incidente"
                                 icon={{
                                     path: window.google.maps.SymbolPath.CIRCLE,
-                                    fillColor: "#FF0000", // Marcador rojo
+                                    fillColor: "#FF0000",
                                     fillOpacity: 1,
                                     strokeColor: "#FF0000",
                                     strokeWeight: 1,
@@ -195,43 +192,6 @@ const ListIncidentes = () => {
                             />
                         )}
 
-                        {/* Mostrar los marcadores de los municipios */}
-                        {selectedIncidente && selectedIncidente.origenMunicipio && selectedIncidente.destinoMunicipio && (
-                            <>
-                                {/* Marcador de origen */}
-                                <AdvancedMarker
-                                    position={{
-                                        lat: selectedIncidente.carretera.municipioOrigen.latitud,
-                                        lng: selectedIncidente.carretera.municipioOrigen.longitud,
-                                    }}
-                                    title={`Municipio de Origen: ${selectedIncidente.carretera.municipioOrigen.nombre}`}
-                                    icon={{
-                                        path: window.google.maps.SymbolPath.CIRCLE,
-                                        fillColor: "#00FF00", // Verde para el origen
-                                        fillOpacity: 1,
-                                        strokeColor: "#00FF00",
-                                        strokeWeight: 1,
-                                        scale: 8,
-                                    }}
-                                />
-                                {/* Marcador de destino */}
-                                <AdvancedMarker
-                                    position={{
-                                        lat: selectedIncidente.carretera.municipioDestino.latitud,
-                                        lng: selectedIncidente.carretera.municipioDestino.longitud,
-                                    }}
-                                    title={`Municipio de Destino: ${selectedIncidente.carretera.municipioDestino.nombre}`}
-                                    icon={{
-                                        path: window.google.maps.SymbolPath.CIRCLE,
-                                        fillColor: "#0000FF", // Azul para el destino
-                                        fillOpacity: 1,
-                                        strokeColor: "#0000FF",
-                                        strokeWeight: 1,
-                                        scale: 8,
-                                    }}
-                                />
-                            </>
-                        )}
                     </Map>
                 </Modal.Body>
                 <Modal.Footer>

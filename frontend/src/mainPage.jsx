@@ -30,7 +30,6 @@ const MainPage = () => {
     useEffect(() => {
         if (!map || carreteras.length === 0) return;
 
-        // Limpiar elementos anteriores del mapa
         mapElements.forEach((element) => element.setMap(null));
         setMapElements([]);
 

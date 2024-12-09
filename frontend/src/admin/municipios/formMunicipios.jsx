@@ -69,7 +69,7 @@ const FormMunicipios = () => {
     const closeMapModal = () => setShowMap(false);
 
     const defaultCenter = {
-        lat: -16.2902, // Centro de Bolivia
+        lat: -16.2902,
         lng: -63.5887,
     };
 
@@ -132,7 +132,6 @@ const FormMunicipios = () => {
                 </Row>
             </Container>
 
-            {/* Modal para el Mapa */}
             <Modal show={showMap} onHide={closeMapModal} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>Seleccionar Ubicación</Modal.Title>
@@ -142,7 +141,7 @@ const FormMunicipios = () => {
                         mapId="bf51a910020fa25a"
                         style={{ width: "100%", height: "500px" }}
                         defaultCenter={mapCenter}
-                        defaultZoom={6} // Zoom para mostrar Bolivia
+                        defaultZoom={6}
                         onClick={handleMapClick}
                     >
                         {latitud && longitud && (

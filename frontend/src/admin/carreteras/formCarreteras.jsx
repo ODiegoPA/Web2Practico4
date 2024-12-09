@@ -73,7 +73,7 @@ const FormCarreteras = () => {
             map: map,
             icon: {
                 path: window.google.maps.SymbolPath.CIRCLE,
-                fillColor: "#0000FF", // Azul
+                fillColor: "#0000FF",
                 fillOpacity: 1,
                 strokeColor: "#0000FF",
                 strokeWeight: 1,
@@ -204,7 +204,6 @@ const FormCarreteras = () => {
                         defaultZoom={8}
                         onClick={handleMapClick}
                     >
-                        {/* Mostrar marcadores para los municipios */}
                         {origenCoords && (
                             <AdvancedMarker
                                 position={origenCoords}

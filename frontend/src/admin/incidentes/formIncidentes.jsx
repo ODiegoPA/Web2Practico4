@@ -94,8 +94,8 @@ const FormIncidentes = () => {
                 lng: event.detail.latLng.lng,
             };
             setSelectedPosition(newPosition);
-            setLatitud(newPosition.lat); // Sincronizar latitud
-            setLongitud(newPosition.lng); // Sincronizar longitud
+            setLatitud(newPosition.lat);
+            setLongitud(newPosition.lng);
         } else {
             console.error("No se pudo obtener la posición del clic en el mapa:", event);
         }
@@ -108,7 +108,6 @@ const FormIncidentes = () => {
             return;
         }
 
-        // Obtener los puntos de la carretera seleccionada
         const carreteraSeleccionada = carreteras.find((carretera) => carretera.id === parseInt(idCarretera));
         if (carreteraSeleccionada && carreteraSeleccionada.puntosCarretera) {
             setPolylineArray(
@@ -129,10 +128,9 @@ const FormIncidentes = () => {
 
     const guardarIncidente = async (e) => {
         e.preventDefault();
-        // Validar que las coordenadas estén completas
         const lat = selectedPosition?.lat || latitud;
         const lng = selectedPosition?.lng || longitud;
-    
+
         if (!lat || !lng || !idTipoIncidente || !ultimoCambioId) {
             console.error("Por favor, completa todos los campos.");
             console.log("latitud", lat);
@@ -142,7 +140,7 @@ const FormIncidentes = () => {
             console.log("idCarretera", idCarretera);
             return;
         }
-    
+
         const formData = new FormData();
         formData.append("estaConfirmada", true);
         formData.append("latitud", lat);
@@ -272,7 +270,6 @@ const FormIncidentes = () => {
                         defaultZoom={8}
                         onClick={handleMapClick}
                     >
-                        {/* Agregar un marcador si se selecciona una posición */}
                         {selectedPosition && (
                             <AdvancedMarker
                                 position={selectedPosition}

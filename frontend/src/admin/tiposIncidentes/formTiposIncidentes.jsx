@@ -46,7 +46,7 @@ const FormTiposIncidentes = () => {
             console.error("Error al guardar el tipo de incidente:", error);
         }
     }
-    return ( 
+    return (
         <>
         <NavAdminMenu />
             <Container className="mt-3">
