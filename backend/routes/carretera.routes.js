@@ -4,9 +4,11 @@ module.exports = app => {
 
     router.get("/", carreteraController.listCarreteras);
     router.get("/:id", carreteraController.getCarreteraById);
+    router.get("/tipoIncidente/:id", carreteraController.getCarreterasByTipoIncidente);
     router.post("/", carreteraController.createCarretera);
     router.put("/:id", carreteraController.updateCarretera);
     router.delete("/:id", carreteraController.deleteCarretera);
     router.put("/verificar/:id", carreteraController.verificarrEstadoCarretera);
+    router.put("/cambiarNombre/:id", carreteraController.cambiarNombreCarretera);
     app.use('/carretera', router);
 }

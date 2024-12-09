@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Col, Row, Container, Form, Alert } from "react-bootstrap";
 import NavMainMenu from "./components/MainMenu";
@@ -9,7 +9,11 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null); // Estado para errores
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    localStorage.removeItem("user");
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -24,11 +28,10 @@ const LoginPage = () => {
       });
       console.log("Login exitoso:", response.data);
 
-      // Guarda el usuario en localStorage
       localStorage.setItem("user", JSON.stringify(response.data));
 
-      setError(null); // Limpia cualquier error previo
-      navigate("/admin/municipios"); // Navega a la página principal
+      setError(null);
+      navigate("/admin/municipios");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       setError("El correo o la contraseña son incorrectos.");

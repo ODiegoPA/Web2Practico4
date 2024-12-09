@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Button, Card, Col, Row, Container, Form } from 'react-bootstrap';
-import NavAdminMenu from '../../components/AdminMenu';
-import { Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Button, Card, Col, Row, Container, Form, Modal } from "react-bootstrap";
+import NavAdminMenu from "../../components/AdminMenu";
+import { Map, useMap, AdvancedMarker } from "@vis.gl/react-google-maps";
 
 const FormCarreteras = () => {
     const navigate = useNavigate();
@@ -15,13 +15,15 @@ const FormCarreteras = () => {
     const [listaMunicipios, setListaMunicipios] = useState([]);
     const [puntosCarretera, setPuntosCarretera] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
-    const [user, setUser] = useState(null); // Obtener usuario desde localStorage
+    const [mapCenter, setMapCenter] = useState(null);
+    const [origenCoords, setOrigenCoords] = useState(null);
+    const [destinoCoords, setDestinoCoords] = useState(null);
+    const map = useMap();
 
     useEffect(() => {
         getListaMunicipios();
         const storedUser = JSON.parse(localStorage.getItem("user"));
-        setUser(storedUser); // Cargar usuario
-        setUltimoCambioId(storedUser?.id); // Cargar el ID del usuario
+        setUltimoCambioId(storedUser?.id);
         document.title = "Formulario de Carreteras";
     }, []);
 
@@ -35,32 +37,74 @@ const FormCarreteras = () => {
     };
 
     const trazarRuta = () => {
+        if (!idMunicipioOrigen || !idMunicipioDestino) {
+            alert("Por favor selecciona el municipio de origen y destino antes de trazar la ruta.");
+            return;
+        }
+
+        const municipioOrigen = listaMunicipios.find((m) => m.id === parseInt(idMunicipioOrigen));
+        const municipioDestino = listaMunicipios.find((m) => m.id === parseInt(idMunicipioDestino));
+
+        if (!municipioOrigen || !municipioDestino) {
+            alert("Error al cargar las coordenadas de los municipios.");
+            return;
+        }
+
+        const center = {
+            lat: (municipioOrigen.latitud + municipioDestino.latitud) / 2,
+            lng: (municipioOrigen.longitud + municipioDestino.longitud) / 2,
+        };
+
+        setOrigenCoords({ lat: municipioOrigen.latitud, lng: municipioOrigen.longitud });
+        setDestinoCoords({ lat: municipioDestino.latitud, lng: municipioDestino.longitud });
+        setMapCenter(center);
         setShowPopup(true);
     };
 
     const handleMapClick = (event) => {
         const newPoint = {
-            latitud: event.latLng.lat(),
-            longitud: event.latLng.lng(),
+            latitud: event.detail.latLng.lat,
+            longitud: event.detail.latLng.lng,
         };
-        setPuntosCarretera([...puntosCarretera, newPoint]);
+        setPuntosCarretera((prev) => [...prev, newPoint]);
+
+        new window.google.maps.Marker({
+            position: { lat: newPoint.latitud, lng: newPoint.longitud },
+            map: map,
+            icon: {
+                path: window.google.maps.SymbolPath.CIRCLE,
+                fillColor: "#0000FF", // Azul
+                fillOpacity: 1,
+                strokeColor: "#0000FF",
+                strokeWeight: 1,
+                scale: 6,
+            },
+        });
     };
 
     const guardarCarretera = async () => {
+        if (!nombre || !idMunicipioOrigen || !idMunicipioDestino) {
+            alert("Por favor completa todos los campos antes de guardar.");
+            return;
+        }
+
+        if (puntosCarretera.length === 0) {
+            alert("Por favor traza la ruta antes de guardar.");
+            return;
+        }
+
         const carreteraData = {
             nombre,
             estaBloqueada,
             idMunicipioOrigen,
             idMunicipioDestino,
             ultimoCambioId,
-            usuarioId: user?.id, // Mandamos el id del usuario desde localStorage
         };
 
         try {
             const res = await axios.post("http://localhost:3000/carretera", carreteraData);
-            const carreteraId = res.data.id; // Obtenemos el ID de la carretera creada
+            const carreteraId = res.data.id;
 
-            // Ahora guardar los puntos de la carretera
             for (const punto of puntosCarretera) {
                 await axios.post("http://localhost:3000/puntosCarretera", {
                     latitud: punto.latitud,
@@ -114,7 +158,9 @@ const FormCarreteras = () => {
                                         >
                                             <option value="">Selecciona un municipio</option>
                                             {listaMunicipios.map((municipio) => (
-                                                <option key={municipio.id} value={municipio.id}>{municipio.nombre}</option>
+                                                <option key={municipio.id} value={municipio.id}>
+                                                    {municipio.nombre}
+                                                </option>
                                             ))}
                                         </Form.Control>
                                     </Form.Group>
@@ -127,12 +173,18 @@ const FormCarreteras = () => {
                                         >
                                             <option value="">Selecciona un municipio</option>
                                             {listaMunicipios.map((municipio) => (
-                                                <option key={municipio.id} value={municipio.id}>{municipio.nombre}</option>
+                                                <option key={municipio.id} value={municipio.id}>
+                                                    {municipio.nombre}
+                                                </option>
                                             ))}
                                         </Form.Control>
                                     </Form.Group>
-                                    <Button variant="primary" onClick={trazarRuta}>Trazar Ruta</Button>
-                                    <Button variant="success" onClick={guardarCarretera}>Guardar Carretera</Button>
+                                    <Button variant="primary" className="me-2" onClick={trazarRuta}>
+                                        Trazar Ruta
+                                    </Button>
+                                    <Button variant="success" onClick={guardarCarretera}>
+                                        Guardar Carretera
+                                    </Button>
                                 </Form>
                             </Card.Body>
                         </Card>
@@ -140,28 +192,55 @@ const FormCarreteras = () => {
                 </Row>
             </Container>
 
-            {showPopup && (
-                <div className="popup">
+            <Modal show={showPopup} onHide={() => setShowPopup(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Trazar Ruta</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                     <Map
                         mapId="bf51a910020fa25a"
                         style={{ width: "100%", height: "500px" }}
-                        defaultCenter={{ lat: -17.4214, lng: -63.2115 }}
-                        defaultZoom={6}
+                        defaultCenter={mapCenter}
+                        defaultZoom={8}
                         onClick={handleMapClick}
                     >
-                        {puntosCarretera.map((point, index) => (
+                        {/* Mostrar marcadores para los municipios */}
+                        {origenCoords && (
                             <AdvancedMarker
-                                key={index}
-                                position={{
-                                    lat: point.latitud,
-                                    lng: point.longitud,
+                                position={origenCoords}
+                                title="Municipio de Origen"
+                                icon={{
+                                    path: window.google.maps.SymbolPath.CIRCLE,
+                                    fillColor: "#00FF00",
+                                    fillOpacity: 1,
+                                    strokeColor: "#000000",
+                                    strokeWeight: 1,
+                                    scale: 8,
                                 }}
                             />
-                        ))}
+                        )}
+                        {destinoCoords && (
+                            <AdvancedMarker
+                                position={destinoCoords}
+                                title="Municipio de Destino"
+                                icon={{
+                                    path: window.google.maps.SymbolPath.CIRCLE,
+                                    fillColor: "#FF0000",
+                                    fillOpacity: 1,
+                                    strokeColor: "#000000",
+                                    strokeWeight: 1,
+                                    scale: 8,
+                                }}
+                            />
+                        )}
                     </Map>
-                    <Button onClick={() => setShowPopup(false)}>Cerrar</Button>
-                </div>
-            )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowPopup(false)}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 };

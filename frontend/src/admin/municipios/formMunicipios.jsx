@@ -1,9 +1,9 @@
-import axios from 'axios';
-import { useState, useEffect } from 'react';
+import axios from "axios";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Card, Col, Row, Container, Form } from "react-bootstrap";
-import NavAdminMenu from '../../components/AdminMenu';
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { Button, Card, Col, Row, Container, Form, Modal } from "react-bootstrap";
+import NavAdminMenu from "../../components/AdminMenu";
+import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
 
 const FormMunicipios = () => {
     const navigate = useNavigate();
@@ -12,10 +12,14 @@ const FormMunicipios = () => {
     const [latitud, setLatitud] = useState("");
     const [longitud, setLongitud] = useState("");
     const [ultimoCambioId, setUltimoCambioId] = useState("");
+    const [showMap, setShowMap] = useState(false);
 
     useEffect(() => {
-        if (!id) return;
-        getMunicipio();
+        if (id) {
+            getMunicipio();
+        }
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        setUltimoCambioId(storedUser?.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
@@ -25,7 +29,6 @@ const FormMunicipios = () => {
             setNombre(response.data.nombre);
             setLatitud(response.data.latitud);
             setLongitud(response.data.longitud);
-            setUltimoCambioId(JSON.parse(localStorage.getItem("user")).id);
         } catch (error) {
             console.error("Error al cargar el municipio:", error);
         }
@@ -33,7 +36,7 @@ const FormMunicipios = () => {
 
     const guardarMunicipio = async () => {
         if (!nombre || !latitud || !longitud) {
-            console.error("Por favor, completa todos los campos.");
+            alert("Por favor, completa todos los campos.");
             return;
         }
 
@@ -45,43 +48,34 @@ const FormMunicipios = () => {
 
         try {
             if (id) {
-                axios.put(`http://localhost:3000/municipio/${id}`, formData)
-                .then(() => {
-                    navigate("/admin/municipios");
-                })
-                .catch(error => {
-                    console.error("Error al actualizar el municipio:", error);
-                });
+                await axios.put(`http://localhost:3000/municipio/${id}`, formData);
             } else {
-                axios.post("http://localhost:3000/municipio", formData)
-                .then(() =>{
-                    navigate("/admin/municipios");
-                })
-                .catch(error => {
-                    console.error("Error al guardar el municipio:", error);
-                });
+                await axios.post("http://localhost:3000/municipio", formData);
             }
+            navigate("/admin/municipios");
         } catch (error) {
             console.error("Error al guardar el municipio:", error);
         }
     };
 
     const handleMapClick = (event) => {
-        setLatitud(event.latLng.lat());
-        setLongitud(event.latLng.lng());
+        if (event.detail && event.detail.latLng) {
+            setLatitud(event.detail.latLng.lat);
+            setLongitud(event.detail.latLng.lng);
+        }
     };
 
-    const centro = {
-        lat: -17.4214, 
-        lng: -63.2115,
+    const openMapModal = () => setShowMap(true);
+    const closeMapModal = () => setShowMap(false);
+
+    const defaultCenter = {
+        lat: -16.2902, // Centro de Bolivia
+        lng: -63.5887,
     };
 
-    const containerStyle = {
-        width: "100%",
-        height: "300px",
-    };
-
-    const mapCenter = latitud && longitud ? { lat: parseFloat(latitud), lng: parseFloat(longitud) } : centro;
+    const mapCenter = latitud && longitud
+        ? { lat: parseFloat(latitud), lng: parseFloat(longitud) }
+        : defaultCenter;
 
     return (
         <>
@@ -125,20 +119,10 @@ const FormMunicipios = () => {
                                         />
                                     </Form.Group>
 
-                                    <LoadScript googleMapsApiKey="TU_API_ACA">
-                                        <GoogleMap
-                                            mapContainerStyle={containerStyle}
-                                            center={mapCenter}
-                                            zoom={6}
-                                            onClick={handleMapClick}
-                                        >
-                                            {latitud && longitud && (
-                                                <Marker position={{ lat: parseFloat(latitud), lng: parseFloat(longitud) }} />
-                                            )}
-                                        </GoogleMap>
-                                    </LoadScript>
-
-                                    <Button variant="primary" onClick={guardarMunicipio}>
+                                    <Button variant="primary" className="me-2" onClick={openMapModal}>
+                                        Seleccionar Ubicación en el Mapa
+                                    </Button>
+                                    <Button variant="success" onClick={guardarMunicipio}>
                                         {id ? "Actualizar" : "Guardar"}
                                     </Button>
                                 </Form>
@@ -147,6 +131,42 @@ const FormMunicipios = () => {
                     </Col>
                 </Row>
             </Container>
+
+            {/* Modal para el Mapa */}
+            <Modal show={showMap} onHide={closeMapModal} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Seleccionar Ubicación</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Map
+                        mapId="bf51a910020fa25a"
+                        style={{ width: "100%", height: "500px" }}
+                        defaultCenter={mapCenter}
+                        defaultZoom={6} // Zoom para mostrar Bolivia
+                        onClick={handleMapClick}
+                    >
+                        {latitud && longitud && (
+                            <AdvancedMarker
+                                position={{ lat: parseFloat(latitud), lng: parseFloat(longitud) }}
+                                title="Ubicación Seleccionada"
+                                icon={{
+                                    path: window.google.maps.SymbolPath.CIRCLE,
+                                    fillColor: "#FF0000",
+                                    fillOpacity: 1,
+                                    strokeColor: "#000000",
+                                    strokeWeight: 1,
+                                    scale: 8,
+                                }}
+                            />
+                        )}
+                    </Map>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={closeMapModal}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 };

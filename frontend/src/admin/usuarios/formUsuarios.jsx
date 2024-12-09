@@ -10,13 +10,15 @@ const FormUsuarios = () => {
     const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [ultimoCambioId, setUltimoCambioId] = useState("");
+    const [ultimoCambioId] = useState(
+        JSON.parse(localStorage.getItem("user"))?.id || ""
+    );
     const [esAdmin, setEsAdmin] = useState(false);
 
     useEffect(() => {
         if (!id) return;
         getUsuario();
-        document.title = "Formulario de Usuarios";
+        document.title = id ? "Editar Usuario" : "Crear Usuario";
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
@@ -26,9 +28,7 @@ const FormUsuarios = () => {
             const usuario = res.data;
             setNombre(usuario.nombre);
             setEmail(usuario.correo);
-            setUltimoCambioId(usuario.ultimoCambioId);
             setEsAdmin(usuario.esAdmin);
-            setPassword(usuario.contrasena);
         } catch (error) {
             console.error("Error al cargar el usuario:", error);
         }
@@ -36,8 +36,20 @@ const FormUsuarios = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const usuarioData = { nombre, email, ultimoCambioId, esAdmin, password };
-        console.log(usuarioData);
+
+        if (!nombre || !email || (!id && !password)) {
+            alert("Por favor, completa todos los campos.");
+            return;
+        }
+
+        const usuarioData = { 
+            nombre, 
+            email, 
+            password: id ? undefined : password, // Solo enviar si se está creando
+            esAdmin, 
+            ultimoCambioId 
+        };
+
         try {
             if (id) {
                 await axios.put(`http://localhost:3000/usuario/${id}`, usuarioData);
@@ -58,7 +70,9 @@ const FormUsuarios = () => {
                     <Col>
                         <Card>
                             <Card.Body>
-                                <Card.Title className="text-center mt-3 mb-3">{id ? "Editar Usuario" : "Crear Usuario"}</Card.Title>
+                                <Card.Title className="text-center mt-3 mb-3">
+                                    {id ? "Editar Usuario" : "Crear Usuario"}
+                                </Card.Title>
                                 <Form onSubmit={handleSubmit}>
                                     <Form.Group controlId="formNombre">
                                         <Form.Label>Nombre</Form.Label>

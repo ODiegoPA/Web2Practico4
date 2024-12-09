@@ -6,7 +6,7 @@ import NavAdminMenu from "../../components/AdminMenu";
 
 const ListTiposIncidentes = () => {
     const [tiposIncidentes, setTiposIncidentes] = useState([]);
-
+    const user = JSON.parse(localStorage.getItem("user"));
     useEffect(() => {
         getListTiposIncidentes();
         document.title = "Lista de Tipos de Incidentes";
@@ -46,7 +46,7 @@ const ListTiposIncidentes = () => {
                                     <thead>
                                         <tr>
                                             <th>Nombre</th>
-                                            <th>Ultimo Cambio</th>
+                                            {user?.esAdmin && (<th>Ultimo Cambio</th>)}
                                             <th></th>
                                             <th></th>
                                         </tr>
@@ -55,7 +55,7 @@ const ListTiposIncidentes = () => {
                                         {tiposIncidentes.map((tipoIncidente) => (
                                             <tr key={tipoIncidente.id}>
                                                 <td>{tipoIncidente.nombre}</td>
-                                                <td>{tipoIncidente.usuarioUltimoCambioTipoIncidente.nombre}</td>
+                                                {user?.esAdmin && (<td>{tipoIncidente.usuarioUltimoCambioTipoIncidente.nombre}</td>)}
                                                 <td>
                                                     <Link to={`/admin/tipoIncidentes/formulario/${tipoIncidente.id}`} className="btn btn-warning btn-sm me-2">Editar</Link>
                                                 </td>

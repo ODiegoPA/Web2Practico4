@@ -5,14 +5,10 @@ import "./MainMenu.css";
 const NavMainMenu = () => {
   const navigate = useNavigate();
 
-  // Recuperar usuario de localStorage
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
-    // Eliminar usuario de localStorage
     localStorage.removeItem("user");
-
-    // Redirigir a la página de inicio
     navigate("/home");
   };
 
@@ -23,9 +19,14 @@ const NavMainMenu = () => {
           TransporteBO
         </Navbar.Brand>
         <Nav className="ms-auto">
+          <Link to="/solicitud">
+            <Button variant="outline-light" className="nav-button">
+              Reportar Incidente
+            </Button>
+          </Link>
           {user ? (
             <>
-              <Link to="/admin">
+              <Link to="/admin/municipios">
                 <Button variant="outline-light" className="nav-button">
                   Panel de Administración
                 </Button>
@@ -41,6 +42,7 @@ const NavMainMenu = () => {
               </Button>
             </Link>
           )}
+          
         </Nav>
       </Container>
     </Navbar>

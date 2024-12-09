@@ -13,6 +13,7 @@ const ListIncidentes = () => {
     const [markerArray, setMarkerArray] = useState([]);
     const [polylineArray, setPolylineArray] = useState([]);
     const map = useMap();
+    const user = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
         getListaIncidentes();
@@ -63,9 +64,12 @@ const ListIncidentes = () => {
         }
     };
 
-    const deleteIncidente = async (id) => {
+    const deleteIncidente = async (incidente) => {
         try {
-            const res = await axios.delete(`http://localhost:3000/incidente/${id}`);
+            const idCarretera = incidente.idCarretera;
+            const res = await axios.delete(`http://localhost:3000/incidente/${incidente.id}`);
+
+            await axios.put(`http://localhost:3000/carretera/verificar/${idCarretera}`);
             console.log("Incidente eliminado:", res.data);
             getListaIncidentes();
         } catch (error) {
@@ -99,9 +103,10 @@ const ListIncidentes = () => {
     };
 
     const defaultCenter = {
-        lat: -17.4214,
-        lng: -63.2115,
+        lat: -16.2902, // Latitud aproximada del centro de Bolivia
+        lng: -63.5887, // Longitud aproximada del centro de Bolivia
     };
+    
 
     return (
         <>
@@ -122,7 +127,7 @@ const ListIncidentes = () => {
                                             <th>Estado</th>
                                             <th>Carretera</th>
                                             <th>Ver en el Mapa</th>
-                                            <th>Ultimo cambio</th>
+                                            {user?.esAdmin && (<th>Ultimo cambio</th>)}
                                             <th></th>
                                             <th></th>
                                         </tr>
@@ -139,16 +144,16 @@ const ListIncidentes = () => {
                                                 <td>
                                                     <Button variant="info" onClick={() => handleShowMap(incidente)}>Ver</Button>
                                                 </td>
-                                                <td>
+                                                {user?.esAdmin && (<td>
                                                     {incidente.usuarioUltimoCambioIncidente?.nombre || "No hay información"}
-                                                </td>
+                                                </td> )}
                                                 <td>
-                                                    <Link to={`/admin/incidente/edit/${incidente.id}`}>
+                                                    <Link to={`/admin/incidentes/formulario/${incidente.id}`}>
                                                         <Button variant="warning">Editar</Button>
                                                     </Link>
                                                 </td>
                                                 <td>
-                                                    <Button variant="danger" onClick={() => deleteIncidente(incidente.id)}>Eliminar</Button>
+                                                    <Button variant="danger" onClick={() => deleteIncidente(incidente)}>Eliminar</Button>
                                                 </td>
                                             </tr>
                                         ))}

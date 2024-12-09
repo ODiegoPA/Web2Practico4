@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 const NavAdminMenu = () => {
     const navigate = useNavigate();
 
-    // Recuperar usuario de localStorage
     const user = JSON.parse(localStorage.getItem("user"));
 
     const handleLogout = () => {
@@ -31,16 +30,19 @@ const NavAdminMenu = () => {
                         </NavDropdown>
                         <NavDropdown title="Incidentes" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to={"/admin/incidentes"}>Lista de Incidentes</NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to={"/admin/incidentes/pendientes"}>Incidentes Pendientes</NavDropdown.Item>
                             <NavDropdown.Item as={Link} to={"/admin/incidentes/formulario"}>Agregar Incidente</NavDropdown.Item>
                         </NavDropdown>
                         <NavDropdown title="Tipos de Incidentes" id="basic-nav-dropdown">
                             <NavDropdown.Item as={Link} to={"/admin/tipoIncidentes"}>Lista de Tipos de Incidentes</NavDropdown.Item>
                             <NavDropdown.Item as={Link} to={"/admin/tipoIncidentes/formulario"}>Agregar Tipo de Incidente</NavDropdown.Item>
                         </NavDropdown>
-                        <NavDropdown title="Usuarios" id="basic-nav-dropdown">
-                            <NavDropdown.Item as={Link} to={"/admin/usuarios"}>Lista de Usuarios</NavDropdown.Item>
-                            <NavDropdown.Item as={Link} to={"/admin/usuarios/formulario"}>Agregar Usuario</NavDropdown.Item>
-                        </NavDropdown>
+                        {user?.esAdmin && (
+                            <NavDropdown title="Usuarios" id="basic-nav-dropdown">
+                                <NavDropdown.Item as={Link} to={"/admin/usuarios"}>Lista de Usuarios</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to={"/admin/usuarios/formulario"}>Agregar Usuario</NavDropdown.Item>
+                            </NavDropdown>
+                        )}
                         {user && (
                             <Button variant="outline-light" className="nav-button" onClick={handleLogout}>
                                 Cerrar Sesión, {user.nombre}
